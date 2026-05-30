@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+.venv/
+*.py[cod]
+*$py.class
+.env
+
+# Node.js
+node_modules/
+.next/
+out/
+build/
+.DS_Store
+
+# Data/Cache
+pdfs_cache/
+output_chunks/
+pipeline_log.txt
+out.txt
+*.csv
+*.json
+*.pdf
+!app/**/*.json
+!web/**/*.json
+!package.json
+!tsconfig.json
+
