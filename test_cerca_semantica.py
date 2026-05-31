@@ -41,12 +41,25 @@ def test_search(query, municipi=None):
         snippet = row['text_article'][:200].replace('\n', ' ') + "..."
         print(f"   Text: {snippet}")
 
+
+QUERIES_RAPIDES = [
+    "ordenança neteja viària municipi",
+    "article sorolls horari nocturn",
+    "límits activitats molestes horari",
+    "sanció mínima infracció lleu",
+    "sanció màxima infracció greu",
+    "ocupació via pública autorització",
+    "manteniment neteja solars privats",
+    "requisits instal·lació terrassa bar",
+    "publicitat façanes permisos municipals",
+    "tall carrer obres permís",
+    "normativa tinença animals domèstics",
+    "excrements gossos obligacions propietari",
+    "recollida selectiva obligacions comerços",
+    "pagament multa reducció termini",
+    "al·legacions expedient sancionador termini",
+]
+
 if __name__ == "__main__":
-    # Test 1: Cerca general sobre tancaments o rural
-    test_search("normativa sobre pastures i fems")
-    
-    # Test 2: Cerca específica per municipi
-    test_search("venda ambulant", municipi="puigcerda")
-    
-    # Test 3: Cerca sobre convivència
-    test_search("sorolls i descans veïnal")
+    for query in QUERIES_RAPIDES:
+        test_search(query)
