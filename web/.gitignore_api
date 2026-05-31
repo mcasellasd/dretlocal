@@ -1,0 +1,13 @@
+web
+.env
+__pycache__/
+*.pdf
+*.csv
+*.json
+!app/**/*.json
+!requirements.txt
+!app/main.py
+!app/config.py
+!app/schemas.py
+!app/services/*.py
+# No oblidis el Procfile
