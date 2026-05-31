@@ -21,7 +21,9 @@ import pandas as pd
 from tqdm import tqdm
 
 # ── Configuració ────────────────────────────────────────────────────────────
-HEADERS = {"User-Agent": "DretLocal/1.0 (recerca academica; contact@dretlocal.cat)"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}
 OUTPUT_DIR = Path("output_chunks")
 PDF_DIR    = Path("pdfs_cache")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -29,25 +31,25 @@ PDF_DIR.mkdir(exist_ok=True)
 
 CSV_INPUT = "Ordenances_cerdanya_complet.csv"
 
-# Municipis de la Cerdanya (codi INE -> nom normalitzat)
+# Municipis de la Cerdanya oficials
 MUNICIPIS_CERDANYA = {
-    "1708280001": "Guils de Cerdanya",
     "1700630001": "Alp",
-    "1700950001": "Bolvir",
-    "1701430001": "Das",
-    "1702450001": "Fontanals de Cerdanya",
-    "1702620001": "Ger",
+    "2505180001": "Bellver de Cerdanya",
+    "1702420002": "Bolvir",
+    "1706170005": "Das",
+    "1706940003": "Fontanals de Cerdanya",
+    "1707890004": "Ger",
+    "1708280001": "Guils de Cerdanya",
     "1704820001": "Isòvol",
-    "1705120001": "Lles de Cerdanya",
-    "1705290001": "Llívia",
-    "1705570001": "Meranges",
-    "1705880001": "Montellà i Martinet",
-    "1707620001": "Prats i Sansor",
-    "1707870001": "Puigcerdà",
-    "1708210001": "Riu de Cerdanya",
-    "1709270001": "Urús",
-    "1701710001": "Bellver de Cerdanya",
-    "1702820001": "Golmés",  # revisar
+    "2512720002": "Lles de Cerdanya",
+    "1709470005": "Llívia",
+    "1709980001": "Meranges",
+    "2513990004": "Montellà i Martinet",
+    "2517520002": "Prats i Sansor",
+    "2517900003": "Prullans",
+    "1714110007": "Puigcerdà",
+    "2591390004": "Riu de Cerdanya",
+    "1709270001": "Urús"
 }
 
 # Classificació automàtica per paraules clau al títol
@@ -172,16 +174,29 @@ def scrape_cido(url: str) -> dict:
 
 # ── 3. Extreure text de PDF ──────────────────────────────────────────────────
 def extreure_pdf(pdf_url: str, cache_path: Path) -> str:
-    if cache_path.exists():
-        with pdfplumber.open(cache_path) as pdf:
-            return "\n".join(p.extract_text() or "" for p in pdf.pages)
+    # Si el fitxer existeix a la cache i té un tamany vàlid (>= 1KB), intentem llegir-lo
+    if cache_path.exists() and cache_path.stat().st_size >= 1024:
+        try:
+            with pdfplumber.open(cache_path) as pdf:
+                return "\n".join(p.extract_text() or "" for p in pdf.pages)
+        except Exception:
+            # Si el fitxer està corromput o falla la lectura, es re-descarrega
+            print(f"  [Cache Corrupta] Re-descarregant PDF: {pdf_url}")
+            pass
 
+    # Descàrrega directa des de la xarxa
     try:
         r = requests.get(pdf_url, headers=HEADERS, timeout=30)
         r.raise_for_status()
-        cache_path.write_bytes(r.content)
-        with pdfplumber.open(cache_path) as pdf:
-            return "\n".join(p.extract_text() or "" for p in pdf.pages)
+        
+        # Comprovem si el fitxer rebut és correcte
+        if len(r.content) >= 1024:
+            cache_path.write_bytes(r.content)
+            with pdfplumber.open(cache_path) as pdf:
+                return "\n".join(p.extract_text() or "" for p in pdf.pages)
+        else:
+            print(f"  [Mida Erronia] PDF massa petit o buit de {pdf_url}")
+            return ""
     except Exception as e:
         print(f"  Error PDF {pdf_url}: {e}")
         return ""

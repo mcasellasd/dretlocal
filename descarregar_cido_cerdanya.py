@@ -4,27 +4,29 @@ import time
 from tqdm import tqdm
 from urllib.parse import urlparse
 
-HEADERS = {"User-Agent": "DretLocal/1.0 (recerca academica; contact@dretlocal.cat)"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}
 
-# Codis INE dels municipis (i ens supramunicipals) de la Cerdanya
+# Codis CIDO oficials dels 17 municipis de la Cerdanya catalana
 MUNICIPIS_CERDANYA = {
-    "1708280001": "Guils de Cerdanya",
     "1700630001": "Alp",
+    "2505180001": "Bellver de Cerdanya",
     "1702420002": "Bolvir",
     "1706170005": "Das",
     "1706940003": "Fontanals de Cerdanya",
     "1707890004": "Ger",
+    "1708280001": "Guils de Cerdanya",
     "1704820001": "Isòvol",
     "2512720002": "Lles de Cerdanya",
     "1709470005": "Llívia",
     "1709980001": "Meranges",
     "2513990004": "Montellà i Martinet",
     "2517520002": "Prats i Sansor",
+    "2517900003": "Prullans",
     "1714110007": "Puigcerdà",
     "2591390004": "Riu de Cerdanya",
-    "1709270001": "Urús",
-    "2505180001": "Bellver de Cerdanya",
-    "9005170005": "Mancomunitat Intermunicipal Cultura Alp, Das, Fontanals, Urús"
+    "1709270001": "Urús"
 }
 
 def es_enllac_normativa_local(href: str) -> bool:

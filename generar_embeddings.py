@@ -18,6 +18,10 @@ from pathlib import Path
 from tqdm import tqdm
 from openai import OpenAI
 from supabase import create_client
+from dotenv import load_dotenv
+
+# Carregar variables d'entorn
+load_dotenv()
 
 # ── Config ──────────────────────────────────────────────────────────────────
 CHUNKS_PATH   = Path("output_chunks/cerdanya_ordenances_chunks.json")
@@ -116,16 +120,21 @@ def generar_embeddings_batch(textos: list[str]) -> list[list[float]]:
 def pujar_chunks(chunks: list[dict]):
     """Puja chunks a Supabase en batches."""
 
+    # Eliminar duplicats locals basats en ID abans de processar
+    chunks_dict = {c["id"]: c for c in chunks}
+    chunks_unics = list(chunks_dict.values())
+    print(f"Chunks totals: {len(chunks)} -> Unics: {len(chunks_unics)}")
+
     # Filtrar els que ja existeixen (per ID)
     ids_existents = set()
     try:
         res = supabase.table("chunks_ordenances").select("id").execute()
         ids_existents = {r["id"] for r in res.data}
-        print(f"Chunks ja existents: {len(ids_existents)}")
-    except:
-        pass
+        print(f"Chunks ja existents a DB: {len(ids_existents)}")
+    except Exception as e:
+        print(f"Avis: No s'han pogut carregar IDs existents ({e})")
 
-    nous_chunks = [c for c in chunks if c["id"] not in ids_existents]
+    nous_chunks = [c for c in chunks_unics if c["id"] not in ids_existents]
     print(f"Chunks nous a processar: {len(nous_chunks)}")
 
     for i in tqdm(range(0, len(nous_chunks), BATCH_SIZE), desc="Embeddings + upload"):
@@ -169,9 +178,33 @@ def pujar_chunks(chunks: list[dict]):
 
 def main():
     print("── Carregant chunks ──")
-    with open(CHUNKS_PATH, encoding="utf-8") as f:
-        chunks = json.load(f)
-    print(f"Total chunks: {len(chunks)}")
+    chunks = []
+    chunks_dir = Path("output_chunks")
+    consolidat = chunks_dir / "cerdanya_ordenances_chunks.json"
+
+    if consolidat.exists():
+        with open(consolidat, encoding="utf-8") as f:
+            chunks = json.load(f)
+        print(f"Carregat fitxer consolidat: {consolidat.name} ({len(chunks)} chunks)")
+    else:
+        # Processar fitxers individuals si no hi ha consolidat
+        for file_path in chunks_dir.glob("*_chunks.json"):
+            if file_path.name == "cerdanya_ordenances_chunks.json":
+                continue
+            try:
+                with open(file_path, encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        chunks.extend(data)
+                        print(f"Carregats {len(data)} chunks de {file_path.name}")
+            except Exception as e:
+                print(f"Error carregant {file_path}: {e}")
+            
+    print(f"Total chunks carregats: {len(chunks)}")
+
+    if not chunks:
+        print("No s'han trobat chunks per processar. Avortant.")
+        return
 
     print("\n── Pujant a Supabase ──")
     print("(Assegura't d'haver executat el SQL de SCHEMA_SQL a Supabase primer)")
