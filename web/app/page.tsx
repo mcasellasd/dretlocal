@@ -69,9 +69,9 @@ const MUNICIPALITIES = [
 ]
 
 const QUICK_PROMPTS = [
-  'Quin regim hi ha per a llicencies urbanistiques?',
-  'Quines taxes s’apliquen per a una activitat?',
-  'Quins requisits hi ha per ocupar la via publica?',
+  'article sorolls horari nocturn',
+  'ocupacio via publica autoritzacio',
+  'pagament multa reduccio termini',
 ]
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
@@ -83,7 +83,7 @@ function uid(prefix: string) {
 export default function Page() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
   const [healthError, setHealthError] = useState<string | null>(null)
-  const [question, setQuestion] = useState('Quin regim hi ha per a llicencies urbanistiques?')
+  const [question, setQuestion] = useState('article sorolls horari nocturn')
   const [municipality, setMunicipality] = useState('Guils de Cerdanya')
   const [category, setCategory] = useState('')
   const [messages, setMessages] = useState<Message[]>([
@@ -264,7 +264,7 @@ export default function Page() {
                     id="question"
                     value={question}
                     onChange={(event) => setQuestion(event.target.value)}
-                    placeholder="Exemple: Quines llicencies urbanistiques calen per reformar un habitatge?"
+                    placeholder="Exemple: ocupacio via publica autoritzacio"
                   />
                 </div>
 
