@@ -84,7 +84,7 @@ export default function Page() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
   const [healthError, setHealthError] = useState<string | null>(null)
   const [question, setQuestion] = useState('article sorolls horari nocturn')
-  const [municipality, setMunicipality] = useState('Guils de Cerdanya')
+  const [municipality, setMunicipality] = useState('')
   const [category, setCategory] = useState('')
   const [messages, setMessages] = useState<Message[]>([
     {

@@ -87,6 +87,16 @@ def chat(payload: ChatRequest) -> ChatResponse:
         category=payload.category,
         limit=settings.max_citations,
     )
+
+    # If a strict municipality filter yields no evidence, broaden the search
+    # to all Cerdanya municipalities before returning a low-confidence answer.
+    if not citations_raw and payload.municipality:
+        citations_raw = search_chunks(
+            payload.question,
+            municipality=None,
+            category=payload.category,
+            limit=settings.max_citations,
+        )
     answer, confidence = generate_answer(payload.question, citations_raw)
 
     citations = [
